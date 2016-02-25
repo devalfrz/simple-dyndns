@@ -11,7 +11,7 @@ http://home.my-domain.com.
 - Hostmonster support
 - Debian/Ubuntu server support
 
-# Installation
+## Installation
 Get and install [simple-dyndns-server](https://github.com/devalfrz/simple-dyndns-server) on a known server https://github.com/devalfrz/simple-dyndns-server.
 
 Get dependencies:
@@ -54,6 +54,12 @@ sudo update-rc.d simpledyndns defaults
 As any standard service on Debian and its cosins, manage the service by writing:
 ```bash
 sudo service simpledyndns start # stop|restart
+```
+## Uninstall
+To uninstall simply remove the daemon record from your server:
+```
+sudo service simpledyndns stop
+sudo update-rc.d -f simpledyndns remove
 ```
 
 ## To-Do
