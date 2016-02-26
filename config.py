@@ -6,7 +6,7 @@ from simpledyndns import Hostmonster
 SIMPLE_DYNDNS_SERVER = SimpleDynDnsServer(
     known_server='http://your-known-server.com/simple-dyndns-server/',#Replace with yor own server
     known_server_key='dyndns',#Replace with your own key
-    server_alias='christine.behuns.com'#Replace with your own unique alias
+    server_alias='dev.my-domain.com'#Replace with your own unique alias
 )
 
 DOMAINS = [
