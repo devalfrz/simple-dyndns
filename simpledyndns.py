@@ -53,7 +53,10 @@ class SimpleDynDnsServer():
             print "Unexpected error:", sys.exc_info()[0]
             return False
         data = json.loads(response.read())
-        return data['ip']
+        try:
+            return data['ip']
+        except KeyError:
+            return ''
 
     def set_new_ip(self,new_ip):
         data = {
