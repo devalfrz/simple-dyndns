@@ -125,7 +125,10 @@ class Hostmonster(DynDnsHost):
         except:
             print "Unexpected error:", sys.exc_info()[0]
             return False
-        records = json.loads(response.read())
+        try:
+            records = json.loads(response.read())
+        except ValueError:
+            return False
         self.old_records = records['data']
         return response
 
