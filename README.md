@@ -16,8 +16,8 @@ Get and install [simple-dyndns-server](https://github.com/devalfrz/simple-dyndns
 
 Get dependencies:
 ```
-sudo apt-get install python-dev libssl-dev
-sudo pip install mechanize
+sudo apt-get install python-dev libssl-dev libcurl4-openssl-dev
+sudo pip install mechanize pycurl
 ```
 Get the package:
 ```

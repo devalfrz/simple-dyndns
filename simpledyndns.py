@@ -9,20 +9,6 @@ import time
 from StringIO import StringIO
 
 
-def __main__(argv):
-    while(True):
-        current_ip = SIMPLE_DYNDNS_SERVER.get_current_ip()
-        last_ip = SIMPLE_DYNDNS_SERVER.get_last_ip()
-        print "Last IP:    %s" % last_ip
-        print "Current IP: %s" % current_ip
-        if current_ip != last_ip:
-            for domain in DOMAINS:
-                domain.login()
-                domain.update_all(current_ip)
-                new_ip = SIMPLE_DYNDNS_SERVER.set_new_ip(current_ip)
-            print "New IP:     %s" % new_ip
-        sleep(SIMPLE_DYNDNS_SERVER.timer)
-
 class SimpleDynDnsServer(): 
     def __init__(self,known_server,known_server_key,server_alias):
         self.known_server=known_server
@@ -38,8 +24,16 @@ class SimpleDynDnsServer():
         except:
             print "Unexpected error:", sys.exc_info()[0]
             return False
-        data = json.loads(response.read())
-        return data['current_ip']
+        try:
+            data = json.loads(response.read())
+        except ValueError:
+            print "Unexpected error:", sys.exc_info()[0]
+            return False
+        try:
+            return data['current_ip']
+        except KeyError:
+            pass
+        return False
         
     def get_last_ip(self):
         data = {
@@ -52,11 +46,16 @@ class SimpleDynDnsServer():
         except:
             print "Unexpected error:", sys.exc_info()[0]
             return False
-        data = json.loads(response.read())
+        try:
+            data = json.loads(response.read())
+        except ValueError:
+            print "Unexpected error:", sys.exc_info()[0]
+            return False
         try:
             return data['ip']
         except KeyError:
-            return ''
+            pass
+        return False
 
     def set_new_ip(self,new_ip):
         data = {
