@@ -61,10 +61,14 @@ if __name__ == '__main__':
 
                     # Set new IP address
 
+                    print "Updating Records..."
+                    log.write("Updating Records...")
+
                     for domain in DOMAINS:
                         domain.login()
                         domain.update_all(current_ip)
                         new_ip = SIMPLE_DYNDNS_SERVER.set_new_ip(current_ip)
+
                     print "New IP:     %s" % new_ip
                     log.write("New IP: %s" % new_ip)
 
