@@ -41,6 +41,7 @@ if __name__ == '__main__':
 
     log = Log()
     log.write('Initializing...')
+    first = True
 
     # Wait for system boot
 
@@ -56,6 +57,10 @@ if __name__ == '__main__':
             else:
                 print "Last IP:    %s" % last_ip
                 print "Current IP: %s" % current_ip
+                if first:
+                    log.write("Last IP:    %s" % last_ip)
+                    log.write("Current IP: %s" % current_ip)
+                    first = False
 
                 if current_ip != last_ip:
 
