@@ -1,5 +1,3 @@
-
-
 import mechanize
 import urllib
 import json
@@ -7,6 +5,7 @@ import sys
 import pycurl
 import time 
 from StringIO import StringIO
+from log import Log
 
 
 class SimpleDynDnsServer(): 
@@ -16,23 +15,20 @@ class SimpleDynDnsServer():
         self.server_alias=server_alias
         self.br = mechanize.Browser()
         self.timer = 30
+        self.log = Log()
                 
     def get_current_ip(self):
         print "Getting current ip..."
         try:
-            response = self.br.open(self.known_server)
-        except:
-            print "Unexpected error:", sys.exc_info()[0]
-            return False
-        try:
+            response = self.br.open(self.known_server,timeout=30)
             data = json.loads(response.read())
-        except ValueError:
-            print "Unexpected error:", sys.exc_info()[0]
-            return False
-        try:
             return data['current_ip']
-        except KeyError:
-            pass
+        except:
+            exception = sys.exc_info()[0]
+            message = "Exception: %s" % (exception,)
+            self.log.write(message)
+            self.br = mechanize.Browser()
+
         return False
         
     def get_last_ip(self):
@@ -42,19 +38,15 @@ class SimpleDynDnsServer():
             }
         endata = urllib.urlencode(data)
         try:
-            response = self.br.open(self.known_server,endata)
-        except:
-            print "Unexpected error:", sys.exc_info()[0]
-            return False
-        try:
+            response = self.br.open(self.known_server,endata,timeout=30)
             data = json.loads(response.read())
-        except ValueError:
-            print "Unexpected error:", sys.exc_info()[0]
-            return False
-        try:
             return data['ip']
-        except KeyError:
-            pass
+        except:
+            exception = sys.exc_info()[0]
+            message = "Exception: %s" % (exception,)
+            self.log.write(message)
+            self.br = mechanize.Browser()
+
         return False
 
     def set_new_ip(self,new_ip):
@@ -66,11 +58,15 @@ class SimpleDynDnsServer():
         endata = urllib.urlencode(data)
         try:
             response = self.br.open(self.known_server,endata)
+            data = json.loads(response.read())
+            return data['ip']
         except:
-            print "Unexpected error:", sys.exc_info()[0]
-            return False
-        data = json.loads(response.read())
-        return data['ip']
+            exception = sys.exc_info()[0]
+            message = "Exception: %s" % (exception,)
+            self.log.write(message)
+            self.br = mechanize.Browser()
+
+        return False
 
 
 class DynDnsHost():
@@ -80,6 +76,7 @@ class DynDnsHost():
         self.password = password
         self.records = records
         self.br = mechanize.Browser()
+        self.log = Log()
     
     def update_record(self,ip,record_name):
         print "Update %s: %s" % (record_name,ip)
@@ -108,8 +105,12 @@ class Hostmonster(DynDnsHost):
             self.br['lpass'] = self.password
             response = self.br.submit()
         except:
-            print "Unexpected error:", sys.exc_info()[0]
+            exception = sys.exc_info()[0]
+            message = "Exception: %s" % (exception,)
+            self.log.write(message)
+            self.br = mechanize.Browser()
             return False
+
         return response
     
     def get_old_records(self):
@@ -121,14 +122,15 @@ class Hostmonster(DynDnsHost):
         endata = urllib.urlencode(data)
         try:
             response = self.br.open(self.urls['records'],endata)
-        except:
-            print "Unexpected error:", sys.exc_info()[0]
-            return False
-        try:
             records = json.loads(response.read())
-        except ValueError:
+            self.old_records = records['data']
+        except:
+            exception = sys.exc_info()[0]
+            message = "Exception: %s" % (exception,)
+            self.log.write(message)
+            self.br = mechanize.Browser()
             return False
-        self.old_records = records['data']
+
         return response
 
     def delete_record(self,record):
@@ -149,8 +151,12 @@ class Hostmonster(DynDnsHost):
         try:
             response = self.br.open(self.urls['records'],endata)
         except:
-            print "Unexpected error:", sys.exc_info()[0]
+            exception = sys.exc_info()[0]
+            message = "Exception: %s" % (exception,)
+            self.log.write(message)
+            self.br = mechanize.Browser()
             return False
+
         return response
 
     def create_record(self,ip,record_name):
@@ -167,16 +173,24 @@ class Hostmonster(DynDnsHost):
         try:
             response = self.br.open(self.urls['records'],endata)
         except:
-            print "Unexpected error:", sys.exc_info()[0]
+            exception = sys.exc_info()[0]
+            message = "Exception: %s" % (exception,)
+            self.log.write(message)
+            self.br = mechanize.Browser()
             return False
+
         return response
     
     def update_record(self,ip,record_name):
-        if not hasattr(self, 'old_records'):
-            self.get_old_records()    
-        old_record = [item for item in self.old_records if (item.get('name') == record_name and item.get('type')=='A' and item.get('class')=='IN')]
-        if old_record:
-            self.delete_record(old_record[0])
-        self.create_record(ip,record_name)
-
+        try:
+            if not hasattr(self, 'old_records'):
+                self.get_old_records()    
+            old_record = [item for item in self.old_records if (item.get('name') == record_name and item.get('type')=='A' and item.get('class')=='IN')]
+            if old_record:
+                self.delete_record(old_record[0])
+            self.create_record(ip,record_name)
+        except:
+            exception = sys.exc_info()[0]
+            message = "Exception: %s" % (exception,)
+            self.log.write(message)
 

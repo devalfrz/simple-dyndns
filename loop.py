@@ -2,37 +2,13 @@
 
 """
 This is the main loop of the system. Will check for a change
-of ip address every 60 seconds and update if it has changed.
+of ip address every 30 seconds and update if it has changed.
 """
 from time import sleep
 from config import *
 from datetime import datetime
+from log import Log
 import sys, os
-
-
-class Log:
-    def __init__(self,log_file='/var/log/simpledyndns/error.log'):
-        self.log_file = log_file
-
-    def write(self,message):
-            """
-            Write in log file
-            """
-
-            # Get time string
-            now = datetime.now().strftime("%a %b %d %H:%M:%S.%f")
-
-            try:
-                # Create a log directory
-                os.makedirs(os.path.dirname(self.log_file))
-            except OSError:
-                pass
-
-            # Append to log
-
-            f = open(self.log_file,'a')
-            f.write("[%s] %s\n" % (now,message))
-            f.close()
 
 
 if __name__ == '__main__':
@@ -52,8 +28,8 @@ if __name__ == '__main__':
             current_ip = SIMPLE_DYNDNS_SERVER.get_current_ip()
             last_ip = SIMPLE_DYNDNS_SERVER.get_last_ip()
             if not current_ip or not last_ip:
-                print "Error connecting to server"
-                log.write("Error connecting to server")
+                print "Error connecting to known server"
+                log.write("Error connecting to known server")
             else:
                 print "Last IP:    %s" % last_ip
                 print "Current IP: %s" % current_ip
@@ -77,8 +53,6 @@ if __name__ == '__main__':
                     print "New IP:     %s" % new_ip
                     log.write("New IP: %s" % new_ip)
 
-            sleep(SIMPLE_DYNDNS_SERVER.timer)
-
         except KeyboardInterrupt:
 
             # Debugging
@@ -95,3 +69,7 @@ if __name__ == '__main__':
             log.write(message)
 
             print message
+
+        sleep(SIMPLE_DYNDNS_SERVER.timer)
+
+
