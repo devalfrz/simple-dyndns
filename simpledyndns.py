@@ -5,7 +5,6 @@ import sys
 import pycurl
 import time 
 from StringIO import StringIO
-from log import Log
 
 
 class SimpleDynDnsServer(): 
@@ -15,7 +14,6 @@ class SimpleDynDnsServer():
         self.server_alias=server_alias
         self.br = mechanize.Browser()
         self.timer = 30
-        self.log = Log()
                 
     def get_current_ip(self):
         print "Getting current ip..."
@@ -24,9 +22,6 @@ class SimpleDynDnsServer():
             data = json.loads(response.read())
             return data['current_ip']
         except:
-            exception = sys.exc_info()[0]
-            message = "Exception: %s" % (exception,)
-            self.log.write(message)
             self.br = mechanize.Browser()
 
         return False
@@ -42,9 +37,6 @@ class SimpleDynDnsServer():
             data = json.loads(response.read())
             return data['ip']
         except:
-            exception = sys.exc_info()[0]
-            message = "Exception: %s" % (exception,)
-            self.log.write(message)
             self.br = mechanize.Browser()
 
         return False
@@ -61,9 +53,6 @@ class SimpleDynDnsServer():
             data = json.loads(response.read())
             return data['ip']
         except:
-            exception = sys.exc_info()[0]
-            message = "Exception: %s" % (exception,)
-            self.log.write(message)
             self.br = mechanize.Browser()
 
         return False
@@ -76,7 +65,6 @@ class DynDnsHost():
         self.password = password
         self.records = records
         self.br = mechanize.Browser()
-        self.log = Log()
     
     def update_record(self,ip,record_name):
         print "Update %s: %s" % (record_name,ip)
@@ -103,15 +91,12 @@ class Hostmonster(DynDnsHost):
             self.br.select_form(name="l_login_form")
             self.br['ldomain'] = self.username
             self.br['lpass'] = self.password
-            response = self.br.submit()
+            return self.br.submit()
         except:
-            exception = sys.exc_info()[0]
-            message = "Exception: %s" % (exception,)
-            self.log.write(message)
             self.br = mechanize.Browser()
-            return False
+        
+        return False
 
-        return response
     
     def get_old_records(self):
         print "Getting old records..."
@@ -124,14 +109,12 @@ class Hostmonster(DynDnsHost):
             response = self.br.open(self.urls['records'],endata)
             records = json.loads(response.read())
             self.old_records = records['data']
+            return response
         except:
-            exception = sys.exc_info()[0]
-            message = "Exception: %s" % (exception,)
-            self.log.write(message)
             self.br = mechanize.Browser()
-            return False
+        
+        return False
 
-        return response
 
     def delete_record(self,record):
         print "Removing record %s..." % record['name']
@@ -149,15 +132,11 @@ class Hostmonster(DynDnsHost):
         }
         endata = urllib.urlencode(data)
         try:
-            response = self.br.open(self.urls['records'],endata)
+            return self.br.open(self.urls['records'],endata)
         except:
-            exception = sys.exc_info()[0]
-            message = "Exception: %s" % (exception,)
-            self.log.write(message)
             self.br = mechanize.Browser()
-            return False
 
-        return response
+        return False
 
     def create_record(self,ip,record_name):
         print "Creating Record %s..." % record_name
@@ -171,15 +150,11 @@ class Hostmonster(DynDnsHost):
         }
         endata = urllib.urlencode(data)
         try:
-            response = self.br.open(self.urls['records'],endata)
+            return self.br.open(self.urls['records'],endata)
         except:
-            exception = sys.exc_info()[0]
-            message = "Exception: %s" % (exception,)
-            self.log.write(message)
             self.br = mechanize.Browser()
-            return False
-
-        return response
+        
+        return False
     
     def update_record(self,ip,record_name):
         try:
@@ -190,7 +165,5 @@ class Hostmonster(DynDnsHost):
                 self.delete_record(old_record[0])
             self.create_record(ip,record_name)
         except:
-            exception = sys.exc_info()[0]
-            message = "Exception: %s" % (exception,)
-            self.log.write(message)
+            pass
 
